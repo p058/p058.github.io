@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Adding Multiple Columns to Spark DataFrames"
-date:   2017-01-14 18:47:51 -0600
+date:   2017-01-07 18:47:51 -0600
 categories: Spark
 ---
 
@@ -36,7 +36,7 @@ data = hc.createDataFrame([Row(user_id = 1, app_usage = {'snapchat' : 2, 'facebo
                           Row(user_id = 3, app_usage = {'netflix' :50, 'facebook' : 5, 'amazon' : 10}, active_hours = {10 : 4, 19 : 6, 20 : 55})])
 ```
 
-Now lets add a column `total_app_usage` indicating total number of sessions
+Now lets add a column, `total_app_usage`, indicating total number of sessions
 
 ```python
 from  pyspark.sql.types import *
@@ -50,7 +50,7 @@ data_new = data.withColumn("total_app_usage", get_total_app_usage(data["app_usag
     
 ```
 
-Now lets add a indicator column `evening_user` indicating whether or not the user is active between 18-21 hours
+Now lets add another column, `evening_user`, indicating whether or not the user is active between 18-21 hours
 
 ```python
 
@@ -163,6 +163,6 @@ data_new.take(3)
  
 ```
 
-You can always switch back to a spark RDD, add columns, and convert it back to a dataframe but I don't find it to be a very neat way to do it.
+You can always use the RDD API, add columns, and convert it back to a dataframe but I don't find it a very neat way to do it.
 
 Thanks for reading.
