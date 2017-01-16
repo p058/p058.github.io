@@ -73,17 +73,34 @@ Instead of writing multiple withColumn statements lets create a simple util func
 ```python
 
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import lit, array
 
 def add_columns(self, list_of_tuples):
 
+
     """
+
     :param self: Spark DataFrame
-    :param list_of_tuples: [
+
+    :param list_of_tuples: 
+    Ex:
+    
+    [
+
     ("old_column_1", ["new_column_1", "new_column_2"], ["func_1", "func_2"]),
+
     ("old_column_2", ["new_column_3", "new_column_4"], ["func_2", "func_3"])
+
     (["old_column_1","old_column_2"], ["new_column_5"], ["func_4"])
+    
+    (["old_column_1", lit(10)], ["new_column_6"], ["func_5"])
+    
+    (["old_column_1", array(lit(1), lit(2), lit(3))], ["new_column_7"], ["func_6"])
+
     ]
+
     :return: Spark DataFrame with new columns
+
     """
 
     for col in list_of_tuples:
@@ -91,22 +108,22 @@ def add_columns(self, list_of_tuples):
         prev_col = col[0]
 
         if isinstance(prev_col, list):
-        
-            cols = [self[j] for j in prev_col]
+            cols = [self[j] if isinstance(j, str) else j for j in prev_col]
 
             for new_col, func in zip(col[1], col[2]):
-
                 self = self.withColumn(new_col, func(*cols))
 
         else:
 
             for new_col, func in zip(col[1], col[2]):
-
-                self = self.withColumn(new_col, func(self[prev_col]))
-
+                col = self[prev_col] if isinstance(prev_col, str) else prev_col
+                self = self.withColumn(new_col, col)
+                
     return self
 
+
 DataFrame.add_columns = add_columns
+
 ```
 
 Now lets use the `add_columns` method to add multiple columns
