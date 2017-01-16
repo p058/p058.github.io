@@ -149,8 +149,7 @@ data_new = data.add_columns([("app_usage", ["most_used_app", "facebook_user", "t
 
 ```
 
-You can also use builtin spark functions along with your udf's. You can also apply functions on multiple columns by passing the old columns as a list.
-
+You can also use spark builtin functions along with your own udf's. As you have seen above, you can also apply udf's on multiple columns by passing the old columns as a list.
 
 ```python
 data_new.take(3)
@@ -163,6 +162,6 @@ data_new.take(3)
  
 ```
 
-You can always use the RDD API, add columns, and convert it back to a dataframe but I don't find it a very neat way to do it.
+You can always covert a dataframe to RDD, add columns, and switch it back to dataframe but I don't find it to be a very neat way to do it.
 
 Thanks for reading.
