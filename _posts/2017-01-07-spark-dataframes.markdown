@@ -117,7 +117,7 @@ def add_columns(self, list_of_tuples):
 
             for new_col, func in zip(col[1], col[2]):
                 col = self[prev_col] if isinstance(prev_col, str) else prev_col
-                self = self.withColumn(new_col, col)
+                self = self.withColumn(new_col, func(col))
                 
     return self
 
