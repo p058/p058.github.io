@@ -179,6 +179,6 @@ data_new.take(3)
  
 ```
 
-You can always covert a dataframe to RDD, add columns, and switch it back to dataframe but I don't find it to be a very neat way to do it.
+You can always covert a dataframe to RDD, add columns, and switch it back to a dataframe but I don't find it to be a very neat way to do it.
 
 Thanks for reading.
