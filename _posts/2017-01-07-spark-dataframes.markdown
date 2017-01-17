@@ -8,7 +8,7 @@ categories: Spark
 I have been using spark's dataframe API for quite sometime and often I would want to add many columns to a dataframe(for ex :  Creating more features from existing features for a machine learning model) and find it hard to write many withColumn statements. So I monkey patched spark dataframe to make it easy to add multiple columns
 to spark dataframe.
 
-First we create a 'udf_wrapper' decorator to keep the code concise
+First lets create a `udf_wrapper` decorator to keep the code concise
 
 ```python
 from pyspark.sql.functions import udf
