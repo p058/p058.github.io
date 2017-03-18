@@ -5,11 +5,14 @@ date:   2017-03-13 21:43:43 -0600
 categories: Machine Learning
 ---
 
-In machine learning sometimes we come across features which  may not have any value to the model by themselves but including additional metadata associated with 
-such features could be useful and a very good example of such feature is app bundle id's used by a user. The app ID in itself may not be very useful as a feature in a 
+In machine learning sometimes we come across features which may not have any value to the model by themselves but including additional metadata associated with 
+such features could be useful and a very good example of such a feature is app bundle id's(or apps) used by a user. The app ID in itself may not be very useful as a feature in a 
 model but app descriptions, app category, rating e.t.c could be very valuable depending on what we are modeling. In this post, we map a set of app ID's to
-vectors using word2vec. I pulled app descriptions for a sample of ~500 app bundle Ids and the sample can be downloaded [here](https://github.com/p058/word2vec-appdescriptions)
+vectors using [word2vec](https://en.wikipedia.org/wiki/Word2vec). Word2Vec is a very useful model that embeds words into lower dimensional spaces. 
+At a very very high level it maps a one hot encoded word vector to a lower dimensional vector and the lower dimensional vectors are fed as features into 
+ML models.
 
+I pulled app descriptions for a sample of ~500 app bundle Ids and the sample can be downloaded [here](https://github.com/p058/word2vec-appdescriptions)
 
 First, we preprocess the app descriptions by removing stopwords, removing punctutation e.t.c
 
@@ -68,19 +71,19 @@ for word in words:
 ```
 
 Now we have a model that maps words to vector but we want to map app Id's to vector and each app Id has a set of words in its description, 
-so we have few options to do the mapping.
+so we have few options to do the mapping from app to vector.
 a) take an average of all vectors corresponding to word list for an app
-b) append the vectors corresponding to all words for an app (the sizes of vectors could vary for each app so you may have to
- limit the number of dimensions in this case)
+b) append the vectors corresponding to all words for an app (the sizes of vectors could vary for each app since each app could have different number
+of words in its description, so you may have to limit the size of the resultant vector in this case)
 c) take a weighted average of the word vectors where the weights are calculated as tf-idf scores for the words. (For ex: 
 if App1 --> (word1, word2, word3)
 and word1 --> vec1, word2 --> vec2, word3 --> vec3
-App1 --> vec1*tf1+vec2*tf2+vec3*tf3
+then App1 --> vec1*tf1+vec2*tf2+vec3*tf3 where tf1, tf2, tf3 are tf-idf scores for word1, word2, word3 respectively
 )
 
-Features extracted using weighted average seems to have more semantic meaning.
+Option a,b are straightforward. Lets do option c 
  
-Lets get tf-idf scores for all the words
+Get tf-idf scores for all the words
 
 ```python
 from collections import Counter
@@ -97,7 +100,7 @@ app_descriptions['tf-idf'] = app_descriptions['tf'].apply(
 
 ```
 
-Now lets convert app ID's to vectors
+Convert app ID's to vectors
 
 ```python
 
