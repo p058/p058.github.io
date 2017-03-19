@@ -137,14 +137,14 @@ b = app_vector[weatherapp1] #weather app
 from sklearn.metrics.pairwise import cosine_similarity
 print cosine_similarity(a.reshape(1,-1), b.reshape(1,-1))[0,0])
 
-##0.374598927786
+##0.30
 
 a = app_vector[weatherapp1] #weather app
 b = app_vector[weatherapp2] #weather app
 
 print cosine_similarity(a.reshape(1,-1), b.reshape(1,-1))[0,0])
 
-## 0.977446654722
+## 0.98
 ```
 
 It would be interesting to plot the first two principal components of the app vectors and see if we could find app clusters by category.
