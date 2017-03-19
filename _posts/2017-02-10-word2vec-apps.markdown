@@ -50,7 +50,7 @@ Now, lets train word2vec model on the app descriptions
 ```python
 
 sentences = list(app_descriptions.Words)
-num_features = 200  # Size of vector
+num_features = 100  # Size of vector
 min_word_count = 1  # minimum frequency to be included for training. (=1 to train on all words)
 context = 10  # Context window size (number of words to left/right to be used as context)
 downsampling = 1e-2 # proportion to down sample frequently seen words
@@ -148,8 +148,60 @@ print cosine_similarity(a.reshape(1,-1), b.reshape(1,-1))[0,0])
 ```
 
 It would be interesting to plot the first two principal components of the app vectors and see if we could find app clusters by category.
-Since there are too many categories, let us plot principal components for vectors of just the top two app categories.
+Since there are too many categories, let us plot principal components for vectors of just two app categories.
+
+```python
+
+uniqueCategories = ['Entertainment', 'Simulation'] ##These categories have equal number of samples
+
+apps_to_plot = list(app_descriptions[app_descriptions.Category.isin(uniqueCategories)]['App Bundle Id']) ##List of apps to plot
+
+X = np.array([app_vector[app] for app in apps_to_plot]) ##Get app vectors for the apps
+```
+
+Get the top two principal components 
+
+```python
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2, whiten=True)
+
+transformed_vecs = pca.fit_transform(X)
+
+print pca.explained_variance_ratio_
+
+
+```
+
+Now, lets plot them
+
+```python
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+from matplotlib import colors as mcolors
+
+colorMap = dict(zip(uniqueCategories,mcolors.cnames.keys()[:len(uniqueCategories)]))
+colors = [colorMap[categories_dict[app]] for app in apps_to_plot]
+
+fig = plt.figure(figsize=(20,10))
+ax = fig.add_subplot(111)
+
+ax.scatter(transformed_vecs[:,0], transformed_vecs[:,1], c=colors, marker='o', s=200, alpha=0.7)
+ax.axhline(y=0.25, color='r')
+
+ax.set_xlim(-1, 0.6)
+ax.set_ylim(-2, 2)
+
+ax.set_xlabel('X Label')
+ax.set_ylabel('Y Label')
+
+```
+
+From the plot below we can see that the red line can distinguish between categories. We can see even more clearer
+clusters if we train on a larger sample of app descriptions.
+![alt text](https://github.com/p058/p058.github.io/images/word2vec_1.png)
 
 Code for pulling app descriptions can be found [here](https://github.com/p058/word2vec-appdescriptions)
 
+Thanks for reading :) 
 
