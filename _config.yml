@@ -20,6 +20,7 @@ title: Prash's Blog
 #baseurl: "" # the subpath of your site, e.g. /blog
 #url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  p058
+baseurl: /p058.github.io
 
 # Build settings
 markdown: kramdown

@@ -198,7 +198,7 @@ ax.set_ylabel('Y Label')
 ```
 
 From the plot below we can see that the red line can distinguish between categories. We can see even more clearer
-clusters if we train on a larger sample of app descriptions. ![principal_components](https://github.com/p058/p058.github.io/tree/master/images/word2vec_1.png){:class="img-responsive"}
+clusters if we train on a larger sample of app descriptions. ![principal_components]({{site.baseurl}}/images/word2vec_1.png){:class="img-responsive"}
 
 Code for pulling app descriptions can be found [here](https://github.com/p058/word2vec-appdescriptions)
 
