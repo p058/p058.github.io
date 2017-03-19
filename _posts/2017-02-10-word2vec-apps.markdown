@@ -180,6 +180,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib import colors as mcolors
 
+
+app_descriptions.index = app_descriptions['App Bundle Id']
+categories_dict = app_descriptions['Category'].to_dict()
+
 colorMap = dict(zip(uniqueCategories,mcolors.cnames.keys()[:len(uniqueCategories)]))
 colors = [colorMap[categories_dict[app]] for app in apps_to_plot]
 
