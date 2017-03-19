@@ -12,7 +12,7 @@ vectors using [word2vec](https://en.wikipedia.org/wiki/Word2vec). Word2Vec is a 
 At a very very high level it maps a one hot encoded word vector to a lower dimensional vector and the lower dimensional vectors are fed as features into 
 ML models.
 
-I pulled app descriptions for a sample of ~500 app bundle Ids and the sample can be downloaded [here](https://github.com/p058/word2vec-appdescriptions)
+I pulled app descriptions, categories for a sample of ~500 app bundle Ids and the sample can be downloaded [here](https://github.com/p058/word2vec-appdescriptions)
 
 First, we preprocess the app descriptions by removing stopwords, removing punctutation e.t.c
 
@@ -137,15 +137,18 @@ b = app_vector[weatherapp1] #weather app
 from sklearn.metrics.pairwise import cosine_similarity
 print cosine_similarity(a.reshape(1,-1), b.reshape(1,-1))[0,0])
 
-##0.40323566
+##0.374598927786
 
 a = app_vector[weatherapp1] #weather app
 b = app_vector[weatherapp2] #weather app
 
 print cosine_similarity(a.reshape(1,-1), b.reshape(1,-1))[0,0])
 
-##0.97410025
+## 0.977446654722
 ```
+
+It would be interesting to plot the first two principal components of the app vectors and see if we could find app clusters by category.
+Since there are too many categories, let us plot principal components for vectors of just the top two app categories.
 
 Code for pulling app descriptions can be found [here](https://github.com/p058/word2vec-appdescriptions)
 
