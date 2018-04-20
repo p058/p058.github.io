@@ -34,7 +34,7 @@ my delivery spending & instead go out & get good. I did good for one month there
 ![food delivery type]({{site.baseurl}}/images/food_delivery_type.png){:class="img-responsive"}
 
 Finally, while plotting my spending habits, I realized how I never get bored of eating the same food.
-The plot below shows how I ate at the same restaurants continuously for several weeks and then move on to a
+The plot below shows how I ate at the same restaurants continuously for several weeks and then moved on to a
 different restaurant.
 
 {% include visits_by_restaurant.html caption="Spending on Amazon over Time."%}
