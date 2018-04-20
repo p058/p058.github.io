@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Yolo Object Detection"
+title:  "How I spent my Money"
 date:   2018-02-10 21:43:43 -0600
 categories: Noone Cares
 ---
@@ -12,4 +12,4 @@ did some analysis
 
 I spent most of my money on Merchandise &
 
-![principal_components]({{site.baseurl}}/images/word2vec_1.png){:class="img-responsive"}
+![principal_components]({{site.baseurl}}/images/money_by_category.png){:class="img-responsive"}
