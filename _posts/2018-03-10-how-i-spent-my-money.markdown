@@ -20,4 +20,16 @@ my non-amazon spending, majority of my money goes into food, which makes sense, 
 
 ![money_by_category_amazon]({{site.baseurl}}/images/money_by_category_on_amzn.png){:class="img-responsive"}
 
+Money spent on amazon over time. The number of orders I made on amazon averaged at ~ 15 orders per month
+for Jun'17-Jan'18. That's a lot of spending. : (
+
 {% include spending_on_amzn.html caption="Spending on Amazon over Time."%}
+
+Within food, I spend a lot of money on delivery after I moved to Austin. When I was in Kansas, I used
+to go out to eat or get food, but after moving to Austin, I relied mostly on Doordash/Grubhub (No doordash in Kansas).
+In Aug, Sep, I ordered from Doordash/Grubhub on a daily basis. In Oct, I got a roommate, who is a pretty good cook :P.
+So, the number of orders went down a bit. In January, I made a new year resolution to cut my delivery spending &
+instead go out & get good. I did good for one month there....
+
+![food delivery type]({{site.baseurl}}/images/food_delivery_type.png){:class="img-responsive"}
+
