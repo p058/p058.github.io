@@ -20,3 +20,4 @@ my non-amazon spending, majority of my money goes into food, which makes sense, 
 
 ![money_by_category_amazon]({{site.baseurl}}/images/money_by_category_on_amzn.png){:class="img-responsive"}
 
+{% include spending_on_amzn.html %}
