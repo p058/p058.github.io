@@ -37,6 +37,6 @@ Finally, while plotting my spending habits, I realized how I never get bored of 
 The plot below shows how I ate at the same restaurants continuously for several weeks and then moved on to a
 different restaurant.
 
-{% include visits_by_restaurant.html caption="Spending on Amazon over Time."%}
+{% include visits_by_restaurant2.html caption="Spending on Amazon over Time."%}
 
 <!-- ![fav restaurants]({{site.baseurl}}/images/fav_restaurants.png){:class="img-responsive"} -->
