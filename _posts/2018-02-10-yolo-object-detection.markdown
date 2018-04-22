@@ -70,7 +70,80 @@ equations if they are not clear.
 
 ![parametrization]({{site.baseurl}}/images/feature_map.png){:class="img-responsive"}
 
+To make things clear, lets go through an example:
+
+** Step 1: ** Raw Image. The image is resized into the shape that the networks expect, in this case,
+we resize the image to (416, 416)
+
+![raw_image]({{site.baseurl}}/images/raw_image.png){:class="img-responsive"}
+
+** Step 2: ** The resized image is passed through a CNN (we will talk about the CNN later) and we get
+the output tensor of size (batch_size, num_channels, cell_width, cell_height) and after we convert the conv
+output to bbox coordinates and plot them, we get something like this:
+
+![raw_image]({{site.baseurl}}/images/img_with_all_outputs.png){:class="img-responsive"}
+
+Raw PyTorch code to convert the CNN output to actual output would look something like this, this is
+basically code for the above equations.
+
+breakdown the CNN output
+
+```python
+        batch_size, num_predictions, cell_width, cell_height = output.size()
+
+        # resize the output
+        output = output.view(batch_size, num_anchors, (5 + num_classes),
+                             cell_width,
+                             cell_height)
+
+        # break the output
+        tx_hat, ty_hat, tw_hat, th_hat, tconf_hat, tcls_hat = [output[:, :, 0, :, :].unsqueeze(2),
+                                                               output[:, :, 1, :, :].unsqueeze(2),
+                                                               output[:, :, 2, :, :].unsqueeze(2),
+                                                               output[:, :, 3, :, :].unsqueeze(2),
+                                                               output[:, :, 4, :, :],
+                                                               output.narrow(2, 5, num_classes).contiguous()]
+```
+
+create a meshgrid of cx values
+
+|0 |1 |2 |
+|0 |1 |2 |
+|0 |1 |2 |
+
+```python
+
+        cx = output.data.new(np.linspace(0, cell_width - 1, cell_width)).float().expand(batch_size,
+                                                                                        num_anchors,
+                                                                                        1,
+                                                                                        cell_width,
+                                                                                        cell_height)
+
+        cy = output.data.new(np.linspace(0, cell_height - 1, cell_height)).float().expand(batch_size,
+                                                                                          num_anchors,
+                                                                                          1,
+                                                                                          cell_width,
+                                                                                          cell_height). \
+            transpose(3, 4)
+
+        # w,h predictions are with reference to the anchors width, height. To get w, h with respect
+        # to image size, multiply the w, h predictions with anchor width, height
+        anchor_widths = output.data.new([_wh[0] for _wh in anchors]).float().expand(batch_size,
+                                                                                    cell_width,
+                                                                                    cell_height,
+                                                                                    num_anchors).transpose(1, 3)
+
+        anchor_heights = output.data.new([_wh[1] for _wh in anchors]).float().expand(batch_size,
+                                                                                     cell_width,
+                                                                                     cell_height,
+                                                                                     num_anchors).transpose(1, 3)
+
+        bx = (F.sigmoid(tx_hat).data + cx) / cell_width
+        by = (F.sigmoid(ty_hat).data + cy) / cell_height
+        bw = (torch.exp(tw_hat).data * anchor_widths.unsqueeze(2)) / nw
+        bh = (torch.exp(th_hat).data * anchor_heights.unsqueeze(2)) / nh
+
+        return torch.cat([bx, by, bw, bh], 2), tx_hat, ty_hat, tw_hat, th_hat, tconf_hat, tcls_hat
 
 
-
-
+```
