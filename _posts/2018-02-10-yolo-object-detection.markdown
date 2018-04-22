@@ -27,16 +27,15 @@ get your bbox proposals, but if the objects are of variable size, you need many 
 sizes. R-CNN, Fast R-CNN, Faster R-CNN all generate bbox proposals at some stage in the detection pipeline.
 Since the network has to go through several bbox proposals, all these detectors run at <10 fps.
 
-
-![variable-sizes]({{site.baseurl}}/images/large_vs_small.jpg){:class="img-responsive"}
-source: http://www.cornel1801.com/animated/Gulliver-s-Travels-1939/part-5-welcome-to-lilliput.html
-
 2. each bbox has 4 coordinates (center_x, center_y, obj_w, obj_h) , center of the object, width & height
 of the object. you could directly regress to learn these four values, & classify to get obj/noobj, class
 scores. Yolo uses this approach. since you have to run the image through the network just once, these type
 of detectors are fast. Yolo runs at > 30 fps.
 
-    **Note:**The R-CNN's also use regression to predict the offsets to the bbox proposals.
+![variable-sizes]({{site.baseurl}}/images/large_vs_small.jpg){:class="img-responsive"}
+source: http://www.cornel1801.com/animated/Gulliver-s-Travels-1939/part-5-welcome-to-lilliput.html
+
+**Note:**The R-CNN's also use regression to predict the offsets to the bbox proposals.
 
 ## How does Yolo work?
 
@@ -164,13 +163,13 @@ bh = (torch.exp(th).data * ph.unsqueeze(2))
 bbox = torch.cat([bx, by, bw, bh], 2)
 ```
 
-** Step 3 ** : The above image has all the predictions from the CNN, but we only need those predictions where
+**Step 3** : The above image has all the predictions from the CNN, but we only need those predictions where
 there is an object, so we filter based on the objectness score. We set object_threshold to 0.4 and filter the
 predictions. Plotting the filtered predictions would like this:
 
 ![img_with_filtered_outputs]({{site.baseurl}}/images/img_with_filtered_outputs.png){:class="img-responsive"}
 
-** Step 4 ** : This looks much better, but there are still some overlapping bounding boxes. To clear those,
+**Step 4** : This looks much better, but there are still some overlapping bounding boxes. To clear those,
 we drop overlapping bounding boxes using Non Maximum Supression. What we do here is sort all the
 filtered bbox's based on objectness score and go through bbox's from top to bottom and drop all the bboxes with
 an overlap (IoU) greater than a certain threshold. Final output would look like this:
