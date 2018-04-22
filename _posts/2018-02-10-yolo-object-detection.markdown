@@ -72,7 +72,7 @@ equations if they are not clear.
 
 To make things clear, lets go through an example:
 
-** Step 1: ** Raw Image. The image is resized into the shape that the networks expect, in this case,
+**Step 1:** Raw Image. The image is resized into the shape that the networks expect, in this case,
 we resize the image to (416, 416)
 
 ![raw_image]({{site.baseurl}}/images/raw_image.png){:class="img-responsive"}
@@ -106,10 +106,21 @@ tx, ty, tw, th, to, tcls_hat = [output[:, :, 0, :, :].unsqueeze(2),
 ```
 
 create a meshgrid of cx,cy values, for ex: for a 3 x 3 grid
-cx:         cy:
-|0|1|2|     |0|0|0|
-|0|1|2|     |1|1|1|
-|0|1|2|     |2|2|2|
+<table>
+<tr><th>cx </th><th>cy</th></tr>
+<tr><td>
+
+|0|1|2|
+|0|1|2|
+|0|1|2|
+
+</td><td>
+
+|0|0|0|
+|1|1|1|
+|2|2|2|
+
+</td></tr> </table>
 
 
 ```python
@@ -153,8 +164,8 @@ bh = (torch.exp(th).data * ph.unsqueeze(2))
 bbox = torch.cat([bx, by, bw, bh], 2)
 ```
 
-** Step 3 ** : The above image has all the predictions from the CNN, but only need those predictions where
-there is an object, so we filter based on objectness score. We set object_threshold to 0.4 and filter the
+** Step 3 ** : The above image has all the predictions from the CNN, but we only need those predictions where
+there is an object, so we filter based on the objectness score. We set object_threshold to 0.4 and filter the
 predictions. Plotting the filtered predictions would like this:
 
 ![img_with_filtered_outputs]({{site.baseurl}}/images/img_with_filtered_outputs.png){:class="img-responsive"}
@@ -164,6 +175,6 @@ we drop overlapping bounding boxes using Non Maximum Supression. What we do here
 filtered bbox's based on objectness score and go through bbox's from top to bottom and drop all the bboxes with
 an overlap (IoU) greater than a certain threshold. Final output would look like this:
 
-![img_with_final_outputs]({{site.baseurl}}/images/img_with_finaloutputs.png){:class="img-responsive"}
+![img_with_final_outputs]({{site.baseurl}}/images/img_with_final_outputs.png){:class="img-responsive"}
 
 
