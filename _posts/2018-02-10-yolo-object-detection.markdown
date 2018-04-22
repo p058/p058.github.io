@@ -54,7 +54,7 @@ they are predicted w.r.t anchor boxes. For example, if you are working on a pede
 objects are going to have thinner and taller bounding boxes, so instead of predicting w, h directly, they are predicted with respect to the
 predefined anchor boxes and these anchor boxes are calculated using K-means clustering.
 
-** Note: ** In yolov2, the network doesn't predict the bbox coordinates directly but instead uses the following parametrization:
+**Note:** In yolov2, the network doesn't predict the bbox coordinates directly but instead uses the following parametrization:
 
 if bx, by, bw, bh are the actual bbox coordinates & tx, ty, tw, th, to are network predictions, they are related as follows:
 
@@ -105,17 +105,10 @@ tx, ty, tw, th, to, tcls_hat = [output[:, :, 0, :, :].unsqueeze(2),
 ```
 
 create a meshgrid of cx,cy values, for ex: for a 3 x 3 grid
-<table>
-<tr><th>cx </th><th>cy</th></tr>
-<tr><td>
-|0|1|2|
-|0|1|2|
-|0|1|2|
-</td><td>
-|0|0|0|
-|1|1|1|
-|2|2|2|
-</td></tr> </table>
+cx:                 cy:
+0  1  2             0  0  0
+0  1  2             1  1  1
+0  1  2             2  2  2
 
 
 ```python
