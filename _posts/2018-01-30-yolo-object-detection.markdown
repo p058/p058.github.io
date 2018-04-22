@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Yolo"
+title:  "Yolo - Part 1"
 date:   2018-01-30 21:43:43 -0600
 categories: Machine Learning,
 ---
