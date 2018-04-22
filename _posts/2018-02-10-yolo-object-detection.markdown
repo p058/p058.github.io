@@ -43,19 +43,32 @@ of detectors are fast. Yolo runs at > 30 fps.
 In Yolov2, an image is passed through a Convolutional neural network and the output of CNN is a tensor(feature map) of size
 (num_channels,  grid_width , grid_height)
 
-![how_does_it_work]({{site.baseurl}}/images/how_does_it_work.jpg){:class="img-responsive"}
+![how_does_it_work]({{site.baseurl}}/images/how_does_it_work3.png){:class="img-responsive"}
 
-num_channels --> (num_classes + 4 + 1) * num_anchors, 4 is for the bbox coordinates (cx, cy, w, h) & 1 is
+num_channels --> (num_classes + 4 + 1) * num_anchors, 4 is for the four bbox coordinates & 1 is
 for objectness score (whether or not there is an object in that grid cell), num_classes corresponds to the class score
 predictions. num_anchors is the number of predictions at each grid cell. If you look closely, the network makes `num_anchors`
-bbox's, objectness scores, class scores predictions at each grid cell. If the anchors part is not clear, just skip it for now, just
-understand that the network makes several predictions at each grid cell.
+bbox's, objectness scores, class scores predictions at each grid cell.
 
+In Yolov1 width, height of the objects are predicted directly. In Yolov2, instead of predicting the width/height of the object directly
+they are predicted w.r.t anchor boxes. For example, if you are working on a pedestrian dataset, you know most of your
+objects are going to have thinner and taller bounding boxes, so instead of predicting w, h directly, they are predicted with respect to the
+predefined anchor boxes and these anchor boxes are calculated using K-means clustering.
 
+** Note: ** In yolov2, the network doesn't predict the bbox coordinates directly but instead uses the following parametrization:
 
+if bx, by, bw, bh are the actual bbox coordinates & tx, ty, tw, th, to are network predictions, they are related as follows:
 
+        bx = σ(tx) + cx
+        by = σ(ty) + cy
+        bw = p_w * exp(tw)
+        bh = p_h * exp(th)
+        Pr(object) ∗ IoU(b, object) = σ(to)
 
+cx, cy are the width, height to the grid in consideration from the top left corner. The below figure may help clarify the above
+equations if they are not clear.
 
+![parametrization]({{site.baseurl}}/images/feature_map.png){:class="img-responsive"}
 
 
 
