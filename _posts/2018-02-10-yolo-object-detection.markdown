@@ -76,7 +76,7 @@ we resize the image to (416, 416)
 
 ![raw_image]({{site.baseurl}}/images/raw_image.png){:class="img-responsive"}
 
-** Step 2: ** The resized image is passed through a CNN (we will talk about the CNN later) and we get
+**Step 2:** The resized image is passed through a CNN (we will talk about the CNN later) and we get
 the output tensor of size (batch_size, num_channels, cell_width, cell_height) and after we convert the conv
 output to bbox coordinates and plot them, we get something like this:
 
@@ -108,17 +108,13 @@ create a meshgrid of cx,cy values, for ex: for a 3 x 3 grid
 <table>
 <tr><th>cx </th><th>cy</th></tr>
 <tr><td>
-
 |0|1|2|
 |0|1|2|
 |0|1|2|
-
 </td><td>
-
 |0|0|0|
 |1|1|1|
 |2|2|2|
-
 </td></tr> </table>
 
 
