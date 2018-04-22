@@ -27,11 +27,9 @@ get your bbox proposals, but if the objects are of variable size, you need many 
 sizes. R-CNN, Fast R-CNN, Faster R-CNN all generate bbox proposals at some stage in the detection pipeline.
 Since the network has to go through several bbox proposals, all these detectors run at <10 fps.
 
-objects of different sizes
 
 ![variable-sizes]({{site.baseurl}}/images/large_vs_small.jpg){:class="img-responsive"}
-
- source: http://www.cornel1801.com/animated/Gulliver-s-Travels-1939/part-5-welcome-to-lilliput.html
+source: http://www.cornel1801.com/animated/Gulliver-s-Travels-1939/part-5-welcome-to-lilliput.html
 
 2. each bbox has 4 coordinates (center_x, center_y, obj_w, obj_h) , center of the object, width & height
 of the object. you could directly regress to learn these four values, & classify to get obj/noobj, class
@@ -49,9 +47,13 @@ In Yolov2, an image is passed through a Convolutional neural network and the out
 
 num_channels --> (num_classes + 4 + 1) * num_anchors, 4 is for the bbox coordinates (cx, cy, w, h) & 1 is
 for objectness score (whether or not there is an object in that grid cell), num_classes corresponds to the class score
-predictions. num_anchors is the number of predictions at each grid cell. If you look closely, the network makes `num_anchors` bbox's,
-objectness scores, class scores predictions at each grid cell. If the anchors part is not clear, just skip it for now, just
+predictions. num_anchors is the number of predictions at each grid cell. If you look closely, the network makes `num_anchors`
+bbox's, objectness scores, class scores predictions at each grid cell. If the anchors part is not clear, just skip it for now, just
 understand that the network makes several predictions at each grid cell.
+
+
+
+
 
 
 
