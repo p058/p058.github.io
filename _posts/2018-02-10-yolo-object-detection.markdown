@@ -81,7 +81,7 @@ we resize the image to (416, 416)
 the output tensor of size (batch_size, num_channels, cell_width, cell_height) and after we convert the conv
 output to bbox coordinates and plot them, we get something like this:
 
-![raw_image]({{site.baseurl}}/images/img_with_all_outputs.png){:class="img-responsive"}
+![img_with_all_outputs]({{site.baseurl}}/images/img_with_all_outputs.png){:class="img-responsive"}
 
 Raw PyTorch code to convert the CNN output to actual output would look something like this, this is
 basically code for the above equations.
@@ -89,61 +89,81 @@ basically code for the above equations.
 breakdown the CNN output
 
 ```python
-        batch_size, num_predictions, cell_width, cell_height = output.size()
+batch_size, num_predictions, cell_width, cell_height = output.size()
 
-        # resize the output
-        output = output.view(batch_size, num_anchors, (5 + num_classes),
-                             cell_width,
-                             cell_height)
+# resize the output
+output = output.view(batch_size, num_anchors, (5 + num_classes),
+                     cell_width,
+                     cell_height)
 
-        # break the output
-        tx_hat, ty_hat, tw_hat, th_hat, tconf_hat, tcls_hat = [output[:, :, 0, :, :].unsqueeze(2),
-                                                               output[:, :, 1, :, :].unsqueeze(2),
-                                                               output[:, :, 2, :, :].unsqueeze(2),
-                                                               output[:, :, 3, :, :].unsqueeze(2),
-                                                               output[:, :, 4, :, :],
-                                                               output.narrow(2, 5, num_classes).contiguous()]
+# break the output
+tx, ty, tw, th, to, tcls_hat = [output[:, :, 0, :, :].unsqueeze(2),
+                               output[:, :, 1, :, :].unsqueeze(2),
+                               output[:, :, 2, :, :].unsqueeze(2),
+                               output[:, :, 3, :, :].unsqueeze(2),
+                               output[:, :, 4, :, :],
+                               output.narrow(2, 5, num_classes).contiguous()]
 ```
 
-create a meshgrid of cx values
+create a meshgrid of cx,cy values, for ex: for a 3 x 3 grid
+cx:         cy:
+|0|1|2|     |0|0|0|
+|0|1|2|     |1|1|1|
+|0|1|2|     |2|2|2|
 
-|0 |1 |2 |
-|0 |1 |2 |
-|0 |1 |2 |
 
 ```python
 
-        cx = output.data.new(np.linspace(0, cell_width - 1, cell_width)).float().expand(batch_size,
-                                                                                        num_anchors,
-                                                                                        1,
-                                                                                        cell_width,
-                                                                                        cell_height)
+cx = output.data.new(np.linspace(0, cell_width - 1, cell_width)).float().expand(batch_size,
+                                                                                num_anchors,
+                                                                                1,
+                                                                                cell_width,
+                                                                                cell_height)
 
-        cy = output.data.new(np.linspace(0, cell_height - 1, cell_height)).float().expand(batch_size,
-                                                                                          num_anchors,
-                                                                                          1,
-                                                                                          cell_width,
-                                                                                          cell_height). \
-            transpose(3, 4)
-
-        # w,h predictions are with reference to the anchors width, height. To get w, h with respect
-        # to image size, multiply the w, h predictions with anchor width, height
-        anchor_widths = output.data.new([_wh[0] for _wh in anchors]).float().expand(batch_size,
-                                                                                    cell_width,
-                                                                                    cell_height,
-                                                                                    num_anchors).transpose(1, 3)
-
-        anchor_heights = output.data.new([_wh[1] for _wh in anchors]).float().expand(batch_size,
-                                                                                     cell_width,
-                                                                                     cell_height,
-                                                                                     num_anchors).transpose(1, 3)
-
-        bx = (F.sigmoid(tx_hat).data + cx) / cell_width
-        by = (F.sigmoid(ty_hat).data + cy) / cell_height
-        bw = (torch.exp(tw_hat).data * anchor_widths.unsqueeze(2)) / nw
-        bh = (torch.exp(th_hat).data * anchor_heights.unsqueeze(2)) / nh
-
-        return torch.cat([bx, by, bw, bh], 2), tx_hat, ty_hat, tw_hat, th_hat, tconf_hat, tcls_hat
-
-
+cy = output.data.new(np.linspace(0, cell_height - 1, cell_height)).float().expand(batch_size,
+                                                                                  num_anchors,
+                                                                                  1,
+                                                                                  cell_width,
+                                                                                  cell_height). \
+    transpose(3, 4)
 ```
+
+create a anchor widths, heights tensor and expand to required sizes
+
+```python
+pw = output.data.new([_wh[0] for _wh in anchors]).float().expand(batch_size,
+                                                                            cell_width,
+                                                                            cell_height,
+                                                                            num_anchors).transpose(1, 3)
+
+ph = output.data.new([_wh[1] for _wh in anchors]).float().expand(batch_size,
+                                                                             cell_width,
+                                                                             cell_height,
+                                                                             num_anchors).transpose(1, 3)
+```
+
+
+Finally, transform using the equations:
+
+```python
+bx = (F.sigmoid(tx).data + cx)
+by = (F.sigmoid(tx).data + cy)
+bw = (torch.exp(tw).data * pw.unsqueeze(2))
+bh = (torch.exp(th).data * ph.unsqueeze(2))
+bbox = torch.cat([bx, by, bw, bh], 2)
+```
+
+** Step 3 ** : The above image has all the predictions from the CNN, but only need those predictions where
+there is an object, so we filter based on objectness score. We set object_threshold to 0.4 and filter the
+predictions. Plotting the filtered predictions would like this:
+
+![img_with_filtered_outputs]({{site.baseurl}}/images/img_with_filtered_outputs.png){:class="img-responsive"}
+
+** Step 4 ** : This looks much better, but there are still some overlapping bounding boxes. To clear those,
+we drop overlapping bounding boxes using Non Maximum Supression. What we do here is sort all the
+filtered bbox's based on objectness score and go through bbox's from top to bottom and drop all the bboxes with
+an overlap (IoU) greater than a certain threshold. Final output would look like this:
+
+![img_with_final_outputs]({{site.baseurl}}/images/img_with_finaloutputs.png){:class="img-responsive"}
+
+
