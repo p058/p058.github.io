@@ -39,20 +39,49 @@ of detectors are fast. Yolo runs at > 30 fps.
 
 ## How does Yolo work?
 
-In Yolov2, an image is passed through a Convolutional neural network(CNN) and the output of CNN is a tensor(feature map) of size
+In Yolov2, an image is passed through a Convolutional neural network(CNN) and the output of CNN is a feature map of size
 (num_channels,  grid_width , grid_height)
 
 ![how_does_it_work]({{site.baseurl}}/images/how_does_it_work3.png){:class="img-responsive"}
 
-num_channels --> (num_classes + 4 + 1) * num_anchors, 4 is for the four bbox coordinates & 1 is
+where num_channels = (num_classes + 4 + 1) * num_anchors, 4 is for the four bbox coordinates & 1 is
 for objectness score (whether or not there is an object in that grid cell), num_classes corresponds to the class score
-predictions. num_anchors is the number of predictions at each grid cell. If you look closely, the network makes `num_anchors`
-bbox's, objectness scores, class scores predictions at each grid cell.
+predictions. num_anchors is the number of predictions at each grid cell. If you look closely, the network makes bbox's,
+objectness scores, class scores predictions corresponding to various anchors at each grid cell.
 
-In Yolov1 width, height of the objects are predicted directly. In Yolov2, instead of predicting the width/height of the object directly
-they are predicted w.r.t anchor boxes. For example, if you are working on a pedestrian dataset, you know most of your
-objects are going to have thinner and taller bounding boxes, so instead of predicting w, h directly, they are predicted with respect to the
-predefined anchor boxes and these anchor boxes are calculated using K-means clustering.
+What are the anchors doing here?
+Consider an example where you are working with a pedestrian dataset, you know that most of your bounding boxes are going
+to be thin and tall, so instead of predicting width, height of your bounding boxes directly, you can predict offsets to
+some predefined bounding boxes called anchor boxes (or dimension clusters)
+
+How are anchor boxes defined?
+Anchor boxes are defined by their width, height. In Yolov2 the anchor boxes are choosed based on K-means clustering.
+From your training dataset extract all your objects width, height in the following format:
+0 w1 0 h1
+0 w2 0 h2
+...
+where w1, h1... are the width & height scaled to 1. Once you have all your objects, cluster them using K-means with
+various values of k, distance metric d(a, b)= 1 - IoU(a, b), where IoU is the intersection over union between two boxes.
+boxes of similar sizes have low distance between them. choose an appropriate value for k & corresponding cluster centers.
+cluster centers are your anchor boxes.
+
+Running K-means On the VOC dataset with k=5 will give 5 anchor boxes & they look something like this:
+
+![raw_anchors]({{site.baseurl}}/images/raw_anchors.png){:class="img-responsive"}
+
+In the above, the taller and thinner anchor boxes could be for detecting objects like person, tree e.t.c. where as the
+wider ones could be for detecting objects like car, buses e.t.c. So, in this example at each grid cell in the output
+feature map, the network makes 5 predictions, each corresponding to a different anchor.
+
+If we scale the predictions on the output feature map to that of image size and plot predictions for just one grid cell,
+we see:
+
+![anchors_at_a_location]({{site.baseurl}}/images/anchors_at_a_location.png){:class="img-responsive"}
+
+In the above image, the red boxes are the anchor boxes, green boxes are the adjusted bounding boxes and scores are the objectness
+scores. Obviously, not all predictions at a grid cell are valid, we filter them based on objectness scores.
+
+Hopefully, the anchor boxes part is clear.
 
 **Note:** In yolov2, the network doesn't predict the bbox coordinates directly but instead uses the following parametrization:
 
@@ -67,7 +96,10 @@ if bx, by, bw, bh are the actual bbox coordinates & tx, ty, tw, th, to are netwo
 cx, cy are the distances to the top left corner of the grid in consideration from the top left corner of the feature map. The below
 figure may help clarify the above equations if they are not already clear.
 
-![parametrization]({{site.baseurl}}/images/feature_map.png){:class="img-responsive"}
+![parametrization]({{site.baseurl}}/images/feature_map_example.png){:class="img-responsive"}
+
+In the above image, an example 5 x 5 grid(output feature map) is overlayed on the input image and
+an example anchor box & bounding box dimensions are shown at a grid cell location.
 
 Lets go through an example:
 
@@ -76,13 +108,15 @@ we resize the image to (416, 416)
 
 ![raw_image]({{site.baseurl}}/images/raw_image.png){:class="img-responsive"}
 
-**Step 2:** The resized image is passed through a CNN (we will talk about the CNN later) and we get
-the output tensor of size (num_channels, cell_width, cell_height) and after we convert the
-output to bbox coordinates and plot them, we get something like this:
+**Step 2:** The resized image is passed through CNN (we will talk about the CNN later) and we get
+an output tensor of size (num_channels, cell_width, cell_height) and after we convert the
+output tensor to actual bbox coordinates and plot them, we get something like this:
 
 ![img_with_all_outputs]({{site.baseurl}}/images/img_with_all_outputs.png){:class="img-responsive"}
 
-Raw PyTorch code to convert the CNN output to actual output would look something like this, this is
+In the above image, there are 5 * 13 * 13 = 845 bounding boxes.
+
+PyTorch code to convert the CNN output to actual bbox output would look something like this, this is
 basically code for the above equations.
 
 breakdown the CNN output
@@ -140,8 +174,8 @@ ph = output.data.new([_wh[1] for _wh in anchors]).float().expand(batch_size,
 Finally, transform using the above equations:
 
 ```python
-bx = (F.sigmoid(tx).data + cx)
-by = (F.sigmoid(tx).data + cy)
+bx = (torch.sigmoid(tx).data + cx)
+by = (torch.sigmoid(tx).data + cy)
 bw = (torch.exp(tw).data * pw.unsqueeze(2))
 bh = (torch.exp(th).data * ph.unsqueeze(2))
 bbox = torch.cat([bx, by, bw, bh], 2)
@@ -160,5 +194,5 @@ an overlap (IoU) greater than a certain threshold. Final output would look like 
 
 ![img_with_final_outputs2]({{site.baseurl}}/images/img_with_final_outputs2.png){:class="img-responsive"}
 
-We have seen how to go from input image to objects using Yolov2, but we haven't seen what the CNN does &
+We have seen how to go from input image to objects using Yolov2, but we haven't seen the CNN architecture &
 how the CNN is trained. We will go over those in the next post.
