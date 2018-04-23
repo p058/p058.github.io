@@ -50,18 +50,24 @@ predictions. num_anchors is the number of predictions at each grid cell. If you 
 objectness scores, class scores predictions corresponding to various anchors at each grid cell.
 
 What are the anchors doing here?
+
 Consider an example where you are working with a pedestrian dataset, you know that most of your bounding boxes are going
 to be thin and tall, so instead of predicting width, height of your bounding boxes directly, you can predict offsets to
 some predefined bounding boxes called anchor boxes (or dimension clusters)
 
 How are anchor boxes defined?
+
 Anchor boxes are defined by their width, height. In Yolov2 the anchor boxes are choosed based on K-means clustering.
 From your training dataset extract all your objects width, height in the following format:
+
 0 w1 0 h1
+
 0 w2 0 h2
+
 ...
-where w1, h1... are the width & height scaled to 1. Once you have all your objects, cluster them using K-means with
-various values of k, distance metric d(a, b)= 1 - IoU(a, b), where IoU is the intersection over union between two boxes.
+
+where w1, h1... are the width & height scaled to 1. Once you have all your objects, cluster them using K-means for
+various values of k with distance metric d(a, b)= 1 - IoU(a, b), where IoU is the intersection over union between two boxes.
 boxes of similar sizes have low distance between them. choose an appropriate value for k & corresponding cluster centers.
 cluster centers are your anchor boxes.
 
