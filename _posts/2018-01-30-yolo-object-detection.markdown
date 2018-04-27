@@ -28,8 +28,8 @@ sizes. R-CNN, Fast R-CNN, Faster R-CNN all generate bbox proposals at some stage
 Since the network has to go through several bbox proposals, all these detectors run at <10 fps.
 
 2. each bbox can be represented with 4 coordinates (center_x, center_y, obj_w, obj_h) , center of the object,
-width & height of the object. you could directly regress to learn these four values, & classify to learn obj/noobj,
-class scores. Yolo uses this approach. since you have to run the image through the network just once, these type
+width & height of the object. you could regress to learn these four values, & classify to learn obj/noobj scores,
+class scores. Yolo uses this approach. Since you have to run the image through the network just once, these type
 of detectors are fast. Yolo runs at > 30 fps.
 
 <!-- ![variable-sizes]({{site.baseurl}}/images/large_vs_small.jpg){:class="img-responsive"} -->
@@ -53,12 +53,13 @@ What are the anchors doing here?
 
 Consider an example where you are working with a pedestrian dataset, you know that most of your bounding boxes are going
 to be thin and tall, so instead of predicting width, height of your bounding boxes directly, you can predict offsets to
-some predefined bounding boxes called anchor boxes (or dimension clusters)
+some predefined bounding boxes called anchor boxes (or dimension clusters).
 
 How are anchor boxes defined?
 
 Anchor boxes are defined by their width, height. In Yolov2 the anchor boxes are choosed based on K-means clustering.
-From your training dataset extract all your objects width, height in the following format:
+To get anchor boxes for your own training dataset, extract width, height of all the objects in your training dataset, in
+the following format:
 
 0 w1 0 h1
 
@@ -66,16 +67,16 @@ From your training dataset extract all your objects width, height in the followi
 
 ...
 
-where w1, h1... are the width & height scaled to 1. Once you have all your objects, cluster them using K-means for
+where w1, h1... are the width & height scaled to 1. Once you have all the objects, cluster the above using K-means for
 various values of k with distance metric d(a, b)= 1 - IoU(a, b), where IoU is the intersection over union between two boxes.
-boxes of similar sizes have low distance between them. choose an appropriate value for k & corresponding cluster centers.
-cluster centers are your anchor boxes.
+Boxes of similar sizes have high IoU, low distance between them. Choose an appropriate value for k & corresponding cluster centers.
+The cluster centers become anchor boxes for your dataset.
 
-Running K-means On the VOC dataset with k=5 will give 5 anchor boxes & they look something like this:
+Running K-means on the VOC dataset with k=5 will give 5 anchor boxes & they look something like this:
 
 ![raw_anchors]({{site.baseurl}}/images/raw_anchors.png){:class="img-responsive"}
 
-In the above, the taller and thinner anchor boxes could be for detecting objects like person, tree e.t.c. where as the
+In the above image, the taller and thinner anchor boxes could be for detecting objects like person, tree e.t.c. where as the
 wider ones could be for detecting objects like car, buses e.t.c. So, in this example at each grid cell in the output
 feature map, the network makes 5 predictions, each corresponding to a different anchor.
 
@@ -84,10 +85,12 @@ we see:
 
 ![anchors_at_a_location]({{site.baseurl}}/images/anchors_at_a_location.png){:class="img-responsive"}
 
-In the above image, the red boxes are the anchor boxes, green boxes are the adjusted bounding boxes and scores are the objectness
-scores. Obviously, not all predictions at a grid cell are valid, we filter them based on objectness scores.
+In the above image, the red boxes are the anchor boxes, green boxes are the predicted bounding boxes and scores are the objectness
+scores. Not all predictions at a grid cell have an object in them, we filter them based on objectness scores.
 
-Hopefully, the anchor boxes part is clear.
+Hopefully, the anchor boxes part is clear. If it isn't look at the below image with feature map overlayed on it, see how the
+anchor box (in dashed lines) is adjusted to get the bounding box prediction for the bus. For example, if we consider 5 anchor boxes,
+the network makes four other predictions at that same grid cell, each corresponding to a different anchor.
 
 **Note:** In yolov2, the network doesn't predict the bbox coordinates directly but instead uses the following parametrization:
 
@@ -99,6 +102,7 @@ if bx, by, bw, bh are the actual bbox coordinates & tx, ty, tw, th, to are netwo
         bh = p_h * exp(th)
         Pr(object) ∗ IoU(b, object) = σ(to)
 
+p_w, p_h are the anchor width, height respectively.
 cx, cy are the distances to the top left corner of the grid in consideration from the top left corner of the feature map. The below
 figure may help clarify the above equations if they are not already clear.
 
@@ -194,8 +198,8 @@ Plotting the filtered predictions would look like this:
 ![img_with_filtered_outputs]({{site.baseurl}}/images/img_with_filtered_outputs.png){:class="img-responsive"}
 
 **Step 4** : This looks much better, but there are still some overlapping bounding boxes. To clear those,
-we drop overlapping bounding boxes using Non Maximum Supression. What we do here is sort all the
-filtered bbox's based on objectness score and go through bbox's from top to bottom and drop all the bboxes with
+we drop overlapping bounding boxes using Non Maximum Supression(NMS). In NMS, we sort all the filtered
+bbox's based on objectness score and go through bbox's from top to bottom and drop all the bboxes with
 an overlap (IoU) greater than a certain threshold. Final output would look like this:
 
 ![img_with_final_outputs2]({{site.baseurl}}/images/img_with_final_outputs2.png){:class="img-responsive"}
